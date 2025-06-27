@@ -1,0 +1,6 @@
+path: /write/entire/path/here/datasets
+train: images/train
+val: images/valid
+nc: 1
+names:
+  0 : person

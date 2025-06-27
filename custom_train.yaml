@@ -1,0 +1,14 @@
+mode: train
+data: ./data.yaml
+epochs: 100
+model: yolo11m.pt
+imgsz: 1280
+single_cls: True
+conf: 0.2
+hsv_h: 0.05
+hsv_s: 0.8
+mixup: 0.2
+cutmix: 0.2
+hsv_v: 0.7
+batch: 16
+patience: 10
