@@ -1,4 +1,4 @@
-path: /write/entire/path/here/datasets
+path: /home/dll1307/PycharmProjects/PedestrianDetection/dataset
 train: images/train
 val: images/valid
 nc: 1
