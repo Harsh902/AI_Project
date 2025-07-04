@@ -1,0 +1,6 @@
+path: /home/dll1305/Documents/ai-project/tf_models/object_detection/quantization/AI_Project/dataset
+train: images/train
+val: images/valid
+nc: 1
+names:
+  0 : person
