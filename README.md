@@ -6,16 +6,24 @@ This document outlines the full process of downloading the **CityPersons** datas
 
 ---
 
-## 📦 Dataset Overview
+## Dataset Overview
 
 - **CityPersons**: A pedestrian detection dataset based on the Cityscapes dataset.
 - **Annotations**: Includes ground-truth bounding boxes (GTBBox) for pedestrians and other categories.
 
 ---
 
-## 📁 Step 1: Download CityPersons Dataset
+## Step 0: Basic Setup
 
-CityPersons is not freely available. To download:
+1. Python required: >=3.11.11
+2. Create a new project in your IDE of choice.
+3. Create a virtual environment in your project: https://docs.python.org/3/library/venv.html
+4. Clone this project
+5. Install the requirements from the requirements.txt : `pip install -r /path/to/requirements.txt`
+
+## Step 1: Download CityPersons Dataset
+
+To download Citypersons:
 
 1. Register at: [https://www.cityscapes-dataset.com/login/](https://www.cityscapes-dataset.com/login/)
 2. After login, go to: [https://www.cityscapes-dataset.com/dataset-overview/#citypersons](https://www.cityscapes-dataset.com/dataset-overview/#citypersons)
@@ -23,10 +31,10 @@ CityPersons is not freely available. To download:
    - `leftImg8bit_trainvaltest.zip` (Cityscapes images)
    - `gtBbox_cityPersons_trainval.zip` (CityPersons bounding boxes)
 
-4. Extract both zip files:
+4. Extract both zip files (use the commands for your respective OS!):
    ```bash
-   unzip leftImg8bit_trainvaltest.zip -d data/
-   unzip gtBbox_cityPersons_trainval.zip -d data/
+   unzip leftImg8bit_trainvaltest.zip -d ./
+   unzip gtBbox_cityPersons_trainval.zip -d .
 
 After downloading and extracting the following zip files:
 
@@ -34,7 +42,7 @@ After downloading and extracting the following zip files:
 - `gtBbox_cityPersons_trainval.zip`
 
 You should have a structure like: \
-data/ \
+project/ \
 ├── leftImg8bit/ \
 │ ├── train/ \
 │ │ ├── aachen/ \
@@ -51,114 +59,162 @@ data/ \
 ├── gtBbox_cityPersons/ \
 │ ├── train/ \
 │ │ ├── aachen/ \
-│ │ │ ├── aachen_000000_000019.txt \
+│ │ │ ├── aachen_000000_000019_gtBboxCityPersons.json \
 │ │ │ └── ... \
 │ │ └── ... \
 │ |── val/ \
 │ | ├── frankfurt/ \
 │ | └── ... \
 
-## 🖼️ Image Files
-
-- **Location:** `leftImg8bit/train/<city>/` and `leftImg8bit/val/<city>/`
-- **Format:** `.png`
-- **Resolution:** `2048 × 1024`
-- **Example filename:**
-
-## 🏷️ Annotation Files
-
-- **Location:** `gtBbox_cityPersons/train/<city>/` and `gtBbox_cityPersons/val/<city>/`
-- **Format:** `.txt` (NOT YOLO yet)
-- **Example filename:**
-
-
 >[!Note] 
 >The test annotations for CityPersons are not public. To evaluate your results, you must follow the instructions mentioned here: \
 >https://github.com/cvgroup-njust/CityPersons
 
-## Converting to Yolo format
+## Step 2: Converting to Yolo format
 
 Ultralytics is the organization responsible for Yolo's developement now. \
 You can find more information about them here: https://docs.ultralytics.com/models/yolo11/
 
 To train a Yolo model using the Ultralytics framework, the images must be moved from their respective city folders to the parent folder. \
-Additionally, the leftImg8bit is renamed to simply images.
-The structure of the repository should look like:
+- Create a new directory called `data`
+- Create 2 sub-director in `data` called `images` and `labels`
+- Create 2 sub-directories in `images`, `train` and `valid`
+- Move the `train` and `valid` files from _leftImg8bit_ folder to the _data/images_ folder
+- Once the files have been renamed, you can run the following script: _move_resources_. 
+- This will move the images and the labels to their parent folders
+
+The structure of the repository should look like: \
 data/ \
 ├── images/ \
 │ ├── train/ \
 │ │ ├── aachen_000000_000019_leftImg8bit.png \
 │ │ ├── ... \
-│ │ ├── bochum_000000_000019_leftImg8bit.png/ \
-│ │ └── ... \
-│ |── val/ \
+│ |── valid/ \
 │ │ ├── frankfurt_000000_000019_leftImg8bit.png \
 │ │ ├── ... \
-│ │ ├── muenster_000000_000019_leftImg8bit.png/ \
-│ │ └── ... \
-
-We no longer keep the city folders, all images are in their parent folders.
-The same process must be done for the labels.
-data/ \
 ├── labels/ \
 │ ├── train/ \
-│ │ ├── aachen_000000_000019_leftImg8bit.txt \
+│ │ ├── aachen_000000_000019_gtBboxCityPersons.json \
 │ │ ├── ... \
-│ │ ├── bochum_000000_000019_leftImg8bit.txt/ \
-│ │ └── ... \
-│ |── val/ \
-│ │ ├── frankfurt_000000_000019_leftImg8bit.txt \
+│ |── valid/ \
+│ │ ├── frankfurt_000000_000019_gtBboxCityPersons.json \
 │ │ ├── ... \
-│ │ ├── muenster_000000_000019_leftImg8bit.txt/ \
-│ │ └── ... \
 
-The complete data directory should resemble this structure:
+Now, you need to convert the `json` file to `txt` format for yolo. \
+For this, run the `convert_json_to_txt.py` file \
+Now, your project should have a data directory that looks like: \
 data/ \
 ├── images/ \
 │ ├── train/ \
 │ │ ├── aachen_000000_000019_leftImg8bit.png \
 │ │ ├── ... \
-│ |── val/ \
+│ |── valid/ \
+│ │ ├── frankfurt_000000_000019_leftImg8bit.png \
+│ │ ├── ... \
+├── labels/ \
+│ ├── train/ \
+│ │ ├── aachen_000000_000019_gtBboxCityPersons.txt \
+│ │ ├── ... \
+│ |── valid/ \
+│ │ ├── frankfurt_000000_000019_gtBboxCityPersons.txt \
+│ │ ├── ... \
+
+We still need to rename the labels to match the image names! \
+For this, you can run the _rename_labels.py_ file \
+Once this is alll done, the data directory would look like: \
+data/ \
+├── images/ \
+│ ├── train/ \
+│ │ ├── aachen_000000_000019_leftImg8bit.png \
+│ │ ├── ... \
+│ |── valid/ \
 │ │ ├── frankfurt_000000_000019_leftImg8bit.png \
 │ │ ├── ... \
 ├── labels/ \
 │ ├── train/ \
 │ │ ├── aachen_000000_000019_leftImg8bit.txt \
 │ │ ├── ... \
-│ |── val/ \
+│ |── valid/ \
 │ │ ├── frankfurt_000000_000019_leftImg8bit.txt \
 │ │ ├── ... \
 
-AI Project: Pedestrian detection using Yolov11m on CityPersons dataset.
+Now, you must create a file called data.yaml, which should have the following structure:
+```yaml
+path: /abosolute/path/to/data
+train: images/train
+val: images/valid
 
-You can install the required libraries through the requiremetns.txt and then export the models
-from the yolo page.
-To export the model, run the export_model.py
+nc: 1
+names:
+  0 : person
+```
 
-# Testing the model
+## Step 3: Training the model
+Now you can train the yolo model by running the `train_yolo.py` script. \
+This will train a Yolo11m model by default, but you can change it to any of the models mentioned below:
+- yolo11n
+- yolo11s
+- yolo11l
+- yolo12n
+- yolo12s
+- yolo12m
+- yolo12l
+- rt-detr-l
+- rt-detr-x
 
-To generate the predctions for a yolo model on the test set, you can run the following python file:
+Where:
+n - nano \
+s - small \
+m - medium \
+l - large \
+rt-detr: real time detection transformer \
+rt-detr-l : real time detection transformer large \
+rt-detr-x : real time detection transformer extra large 
 
-The file name is _yolo_predict.py_
- 
-Once you have generated the predictions, they weill be available in a directory like this:
-_save_dir: 'runs/detect/predict16'_
+The model and its results will be saved automatically in a folder named _runs_.
 
-They will be of the form:
-predict16
--- labels
-    -- berlin something something.txt
+## Step 3: Quantizing the model
+Ultralytics has a built in framework for exporting the models. \
+You can read more about it here: https://docs.ultralytics.com/modes/export/ 
 
-And each text file would contain the id (0 in this case for person), the relative bbox scores and the confidence 
-scroes.
+For quantization, this documentation can be used.
+Models can be exported from the .pt format to tflite, onnx, tfedgetpu etc.
+Exporting to these formats also performs quantization, because tflite, onnx, 
+tfedgetpu etc are all optimized for edge devices.
 
-aYou need to convert this to the COCO format, as mentioned here : https://github.com/cvgroup-njust/CityPersons/blob/master/evaluation/readme.txt
+To export the model you can run the _export_model.py_, which looks like this:
 
-and sent the results to Prof. Zhang using your student email.
+````python
+from ultralytics import YOLO
 
-The files:
-detections_test_full.json etc are my files, but their format is not proper. You need to change this to get the proper 
-results.
+# Add the location to whatever folder your model is in (will be given by the framework)
+model=YOLO("./runs/detect/train15/weights/best.pt") # or last
 
-I use this script to convert the results from yolo to Coco:
-File name: _convert_test_files.py_
+# change the format according to your needs
+model.export(format="engine", data="./data.yaml", half=True, imgsz=1280)
+````
+
+## Step 4: Running predictions
+Ultralytics has a built in framework for running predictions from  the models. \
+You can read more about it here: https://docs.ultralytics.com/modes/predict/ 
+
+To generate predictions from the model you can run the _yolo_predict.py_, which looks like this:
+
+````python
+from ultralytics import YOLO
+
+# Load a pretrained YOLO11n model
+model = YOLO("./runs/detect/train65/weights/best.pt")
+
+# Define path to directory containing images for inference
+source = "./dataset/images/test/"
+
+# Run batched inference on a list of images
+results = model(source, save_txt=True, save_conf=True, stream=True)  # return a list of Results objects
+
+# Process results list
+for result in results:
+    print(result)
+
+
+````
