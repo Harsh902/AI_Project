@@ -64,7 +64,7 @@ project/ \
 │ │ └── ... \
 │ |── val/ \
 │ | ├── frankfurt/ \
-│ | └── ... \
+│ | └── ... 
 
 >[!Note] 
 >The test annotations for CityPersons are not public. To evaluate your results, you must follow the instructions mentioned here: \
@@ -75,12 +75,12 @@ project/ \
 Ultralytics is the organization responsible for Yolo's developement now. \
 You can find more information about them here: https://docs.ultralytics.com/models/yolo11/
 
-To train a Yolo model using the Ultralytics framework, the images must be moved from their respective city folders to the parent folder. \
+To train a Yolo model using the Ultralytics framework, the images must be moved from their respective city folders to the parent folder. 
 - Create a new directory called `data`
-- Create 2 sub-director in `data` called `images` and `labels`
-- Create 2 sub-directories in `images`, `train` and `valid`
-- Move the `train` and `valid` files from _leftImg8bit_ folder to the _data/images_ folder
-- Once the files have been renamed, you can run the following script: _move_resources_. 
+- Create 2 subdirectories in `data` called `images` and `labels`
+- Create 2 subdirectories in `images`, `train` and `valid`
+- Move the `train` and `valid` directories from _leftImg8bit_ folder to the _data/images_ folder
+- Once this is done, you can run the following script: _move_resources.py_. 
 - This will move the images and the labels to their parent folders
 
 The structure of the repository should look like: \
@@ -98,7 +98,7 @@ data/ \
 │ │ ├── ... \
 │ |── valid/ \
 │ │ ├── frankfurt_000000_000019_gtBboxCityPersons.json \
-│ │ ├── ... \
+│ │ ├── ... 
 
 Now, you need to convert the `json` file to `txt` format for yolo. \
 For this, run the `convert_json_to_txt.py` file \
@@ -117,7 +117,7 @@ data/ \
 │ │ ├── ... \
 │ |── valid/ \
 │ │ ├── frankfurt_000000_000019_gtBboxCityPersons.txt \
-│ │ ├── ... \
+│ │ ├── ... 
 
 We still need to rename the labels to match the image names! \
 For this, you can run the _rename_labels.py_ file \
@@ -136,7 +136,7 @@ data/ \
 │ │ ├── ... \
 │ |── valid/ \
 │ │ ├── frankfurt_000000_000019_leftImg8bit.txt \
-│ │ ├── ... \
+│ │ ├── ... 
 
 Now, you must create a file called data.yaml, which should have the following structure:
 ```yaml
@@ -162,7 +162,7 @@ This will train a Yolo11m model by default, but you can change it to any of the 
 - rt-detr-l
 - rt-detr-x
 
-Where:
+Where: \
 n - nano \
 s - small \
 m - medium \
@@ -171,16 +171,16 @@ rt-detr: real time detection transformer \
 rt-detr-l : real time detection transformer large \
 rt-detr-x : real time detection transformer extra large 
 
-The model and its results will be saved automatically in a folder named _runs_.
+The model and its results will be saved automatically in a folder called _runs_. \
+This folder will be generated automatically when you run the training for the first time
 
 ## Step 3: Quantizing the model
-Ultralytics has a built in framework for exporting the models. \
+Ultralytics has a built-in framework for exporting the models. \
 You can read more about it here: https://docs.ultralytics.com/modes/export/ 
 
-For quantization, this documentation can be used.
-Models can be exported from the .pt format to tflite, onnx, tfedgetpu etc.
-Exporting to these formats also performs quantization, because tflite, onnx, 
-tfedgetpu etc are all optimized for edge devices.
+For quantization, this documentation can be used. \
+Models can be exported from the `.pt` format to `tflite`, `onnx`, `tfedgetpu` etc. \
+Exporting to these formats also performs quantization, because they are all optimized for edge devices.
 
 To export the model you can run the _export_model.py_, which looks like this:
 
