@@ -1,6 +1,6 @@
 # AI_Project
 
-# CityPersons and INRIA YOLO Training Pipeline And Jetson Tips
+# CityPersons and INRIA YOLO Training Pipeline + Jetson Execution Instructions
 
 This document outlines the full process of downloading the **CityPersons** and **INRIA** datasets, converting its annotations to **YOLO format**, and training/validating the YOLO model and how to get our results on the Jetson.
 ---
