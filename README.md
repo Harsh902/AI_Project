@@ -1,8 +1,8 @@
 # AI_Project
 
-# CityPersons and INRIA YOLO Training Pipeline
+# CityPersons and INRIA YOLO Training Pipeline And Jetson Tips
 
-This document outlines the full process of downloading the **CityPersons** and **INRIA** datasets, converting its annotations to **YOLO format**, and training/validating the YOLO model.
+This document outlines the full process of downloading the **CityPersons** and **INRIA** datasets, converting its annotations to **YOLO format**, and training/validating the YOLO model and how to get our results on the Jetson.
 ---
 
 License: Apache Version 2.0
@@ -257,7 +257,7 @@ from ultralytics import YOLO
 model=YOLO("yolo11n.pt") # or last
 
 # change the format according to your needs
-model.train(data="./data.yaml")
+results = model.train(data="./data.yaml")
 ````
 
 To check your results on the validation set, you can use the following code. 
@@ -283,6 +283,140 @@ model=YOLO("yolo11n.pt") # or last
 # change the format according to your needs
 results = model.val(data="./data.yaml", split="test")
 ````
+
+# Jetson
+Lastly, to test and evaluate our models on Jetson, first it needs to be setup following the guide here: \
+https://www.waveshare.com/wiki/JETSON-NANO-DEV-KIT
+
+Once it's setup, the code to train, validate and test a model remains the same.
+It would look something like this:
+
+````python
+from ultralytics import YOLO
+
+# Add the location to whatever folder your model is in (will be given by the framework)
+model=YOLO("yolo11n.pt") # or last
+
+# change the format according to your needs
+results = model.train(data="./data.yaml", epochs=100, imgsz=640)
+
+trained_model = YOLO("runs/detect/trainXX/wegiths/best.pt") # or last.pt
+results = trained_model.val(data="./data.yaml", split="test")
+
+source = ["path/to/an/image.png", "path/to/another/image.png", ...]
+trained_model = YOLO("runs/detect/trainXX/wegiths/best.pt") # or last.pt
+results = trained_model(source)
+for result in results:
+   print(result)
+````
+
+To calculate the energy, keep the predict function of the model in a separate file, such as _yolo_predict.py_
+Then, create a file called _calculate_power.py_, and add the following code to it:
+
+````python
+import time
+import subprocess
+import threading
+import psutil
+import os
+
+power_readings = []
+memory_readings = []
+
+READINGS_LOG = "readings_log.txt"
+SUMMARY_LOG = "summary_log.txt"
+
+def read_current(channel=0):
+    path = f"/sys/bus/i2c/drivers/ina3221x/6-0040/iio:device0/in_current{channel}_input"
+    try:
+        with open(path, "r") as f:
+            microamps = int(f.read().strip())  # µA
+        return microamps / 1_000_000  # Convert to A
+    except Exception as e:
+        print(f"Error reading current: {e}")
+        return None
+
+# change the voltage, we had 5, but yours can be different!
+def log_power_and_memory(voltage=5.0, interval=0.5, stop_event=None, log_file=READINGS_LOG):
+    print("Logging power and memory usage...")
+
+    header_needed = not os.path.exists(log_file)
+    with open(log_file, "a") as f:
+        if header_needed:
+            f.write("Run_ID,Timestamp,Power_W,RAM_Used_MB\n")  # Header with run ID
+
+        run_id = int(time.time())  # Unique ID per run, based on start time
+
+        while not stop_event.is_set():
+            current = read_current(0)
+            timestamp = time.time()
+            power = voltage * current if current is not None else None
+            mem_used = psutil.virtual_memory().used / (1024 * 1024)
+
+            if power is not None:
+                power_readings.append((timestamp, power))
+                memory_readings.append((timestamp, mem_used))
+                f.write(f"{run_id},{timestamp:.2f},{power:.3f},{mem_used:.2f}\n")
+            else:
+                f.write(f"{run_id},{timestamp:.2f},N/A,{mem_used:.2f}\n")
+
+            time.sleep(interval)
+
+def run_yolo_and_monitor():
+    global power_readings, memory_readings
+    power_readings = []
+    memory_readings = []
+
+    stop_event = threading.Event()
+    logger_thread = threading.Thread(target=log_power_and_memory, args=(5.0, 0.5, stop_event))
+
+    start_time = time.time()
+    logger_thread.start()
+
+    subprocess.run(["python3", "yolo_predict.py"])
+
+    stop_event.set()
+    logger_thread.join()
+    end_time = time.time()
+
+    duration = end_time - start_time
+
+    with open(SUMMARY_LOG, "a") as f:
+        run_id = int(start_time)
+        f.write(f"\n--- Run {run_id} Summary ---\n")
+        f.write(f"Start Time (Unix): {start_time:.2f}\n")
+        f.write(f"Duration: {duration:.2f} seconds\n")
+
+        if power_readings:
+            avg_power = sum(p for _, p in power_readings) / len(power_readings)
+            energy = avg_power * duration
+            f.write(f"Average Power: {avg_power:.3f} W\n")
+            f.write(f"Estimated Energy Used: {energy:.2f} Joules\n")
+        else:
+            f.write("No power readings recorded.\n")
+
+        if memory_readings:
+            avg_mem = sum(m for _, m in memory_readings) / len(memory_readings)
+            max_mem = max(m for _, m in memory_readings)
+            f.write(f"Average RAM Used: {avg_mem:.2f} MB\n")
+            f.write(f"Peak RAM Used: {max_mem:.2f} MB\n")
+        else:
+            f.write("No memory readings recorded.\n")
+
+    print("\nRun complete. Appended to 'readings_log.txt' and 'summary_log.txt'.")
+
+run_yolo_and_monitor()
+
+````
+The results are saved to the respective log files.
+
+You have reached the end! Congratulations.
+You should be able to:
+- train a Yolo model on CityPersons and INRIA dataset
+- evaluate its performance
+- export it to different formats
+- run it on Jetson and check its metrics such as power usage
+
 
 Author:
 Harsh Amit Doshi.
