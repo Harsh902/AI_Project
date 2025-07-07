@@ -3,7 +3,7 @@
 # CityPersons YOLO Training Pipeline
 
 This document outlines the full process of downloading the **CityPersons** dataset, converting its annotations to **YOLO format**, and training/validating the YOLO model.
-
+License: Apache License, Version 2.0
 ---
 
 ## Dataset Overview
