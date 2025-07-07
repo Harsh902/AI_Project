@@ -1,4 +1,4 @@
-# AI_Project
+# AI Project Tiny ML 2
 
 # CityPersons and INRIA YOLO Training Pipeline + Jetson Execution Instructions
 
